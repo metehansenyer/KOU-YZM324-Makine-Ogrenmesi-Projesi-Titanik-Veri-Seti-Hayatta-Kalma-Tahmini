@@ -56,8 +56,8 @@ YZM324 dersi kapsamında, bugüne kadar öğrendiğimiz makine öğrenmesi bilgi
 ## Kurulum ve Çalıştırma
 
 ```bash
-git clone https://github.com/metehansenyer/KOU-YZM324-MachineLearning-TitanicProject.git
-cd KOU-YZM324-MachineLearning-TitanicProject
+git clone https://github.com/metehansenyer/KOU-YZM324-Makine-Ogrenmesi-Projesi-Titanik-Veri-Seti-Hayatta-Kalma-Tahmini.git
+cd KOU-YZM324-Makine-Ogrenmesi-Projesi-Titanik-Veri-Seti-Hayatta-Kalma-Tahmini
 ```
 
 ```bash
