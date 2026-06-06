@@ -3,6 +3,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import joblib
 from sklearn.linear_model import LogisticRegression
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.tree import DecisionTreeClassifier
@@ -10,7 +11,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix
-from src.config import FIG_DIR, RANDOM_STATE, TEST_SIZE
+from src.config import FIG_DIR, MODELS_DIR, RANDOM_STATE, TEST_SIZE
 
 
 def split_data(df_enc: pd.DataFrame):
@@ -38,15 +39,32 @@ def get_models() -> dict:
     }
 
 
+def _model_path(name: str):
+    safe = name.lower().replace(" ", "_").replace("-", "_")
+    return MODELS_DIR / f"{safe}.joblib"
+
+
 def train_and_evaluate(X_train, X_test, y_train, y_test):
     models = get_models()
     results = []
     fitted_models = {}
 
+    all_saved = all(_model_path(name).exists() for name in models)
+    if all_saved:
+        print("Kaydedilmiş modeller yükleniyor...")
+    else:
+        print("Modeller eğitiliyor ve kaydediliyor...")
+
     for name, model in models.items():
-        model.fit(X_train, y_train)
-        y_pred = model.predict(X_test)
+        path = _model_path(name)
+        if path.exists():
+            model = joblib.load(path)
+        else:
+            model.fit(X_train, y_train)
+            joblib.dump(model, path)
+
         fitted_models[name] = model
+        y_pred = model.predict(X_test)
 
         acc = accuracy_score(y_test, y_pred)
         prec = precision_score(y_test, y_pred, zero_division=0)

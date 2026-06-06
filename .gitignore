@@ -4,9 +4,6 @@ __pycache__/
 *.pyo
 *.pyd
 
-# C extensions
-*.so
-
 # Jupyter Notebook
 .ipynb_checkpoints
 */.ipynb_checkpoints/*
@@ -17,9 +14,6 @@ checkpoint_*.ipynb
 .venv
 env/
 venv/
-ENV/
-env.bak/
-venv.bak/
 
 # IDEs and editors
 .idea/
@@ -35,12 +29,3 @@ venv.bak/
 .Trashes
 ehthumbs.db
 Thumbs.db
-
-# Machine Learning & Data Science artifacts (Eğitilmiş modeller ve büyük veri dosyaları)
-*.pkl
-*.joblib
-*.h5
-*.onnx
-*.pb
-*.pt
-*.pth
