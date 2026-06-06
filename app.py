@@ -1,14 +1,6 @@
-"""
-Titanic Hayatta Kalma Tahmin Arayüzü
---------------------------------------
-Çalıştırmak için:
-    streamlit run app.py
-"""
-
 import sys
 from pathlib import Path
 
-# Proje kökünü sys.path'e ekle — her çalışma dizininden import çalışsın
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import joblib
@@ -23,19 +15,8 @@ from src.modeling import get_models
 from src.preprocessing import encode
 
 
-# ---------------------------------------------------------------------------
-# Kaynakların yüklenmesi (tek sefer — cache_resource ile)
-# ---------------------------------------------------------------------------
-
 @st.cache_resource
 def load_artifacts():
-    """
-    Eğitim pipeline'ındaki scaler'ı birebir yeniden üretir ve
-    kaydedilmiş modelleri yükler.
-
-    NOT: modeling.py:split_data scaler'ı kaydetmediği için burada
-    aynı parametrelerle (test_size, random_state, stratify) fit ediyoruz.
-    """
     df_clean = pd.read_csv(DATA_PROCESSED / "titanic_clean.csv")
     df_enc = encode(df_clean)
 
@@ -51,7 +32,6 @@ def load_artifacts():
     scaler = StandardScaler().fit(X_train)
     feature_columns = X_train.columns
 
-    # modeling._model_path ile aynı adlandırma mantığı
     models = {
         name: joblib.load(
             MODELS_DIR / f"{name.lower().replace(' ', '_').replace('-', '_')}.joblib"
@@ -61,10 +41,6 @@ def load_artifacts():
 
     return scaler, feature_columns, models
 
-
-# ---------------------------------------------------------------------------
-# Sayfa yapılandırması
-# ---------------------------------------------------------------------------
 
 st.set_page_config(
     page_title="Titanic Hayatta Kalma Tahmini",
@@ -80,9 +56,6 @@ st.write(
 
 scaler, feature_columns, models = load_artifacts()
 
-# ---------------------------------------------------------------------------
-# Kullanıcı girdileri
-# ---------------------------------------------------------------------------
 
 st.divider()
 st.subheader("Yolcu Bilgileri")
@@ -141,9 +114,6 @@ model_adi = st.radio(
     horizontal=True,
 )
 
-# ---------------------------------------------------------------------------
-# Tahmin
-# ---------------------------------------------------------------------------
 
 st.divider()
 
@@ -152,7 +122,6 @@ if st.button("🔮 Tahmin Et", use_container_width=True, type="primary"):
     aile_boyutu = kardes_es + ebeveyn_cocuk + 1
     tek_basina = int(aile_boyutu == 1)
 
-    # encode() fonksiyonunun beklediği sütun yapısıyla ham DataFrame
     row = pd.DataFrame([{
         "PassengerClass":   sinif,
         "Sex":              cinsiyet,
@@ -165,19 +134,12 @@ if st.button("🔮 Tahmin Et", use_container_width=True, type="primary"):
         "FamilySize":       aile_boyutu,
         "IsAlone":          tek_basina,
         "Port":             liman,
-        # encode() drop etmediği için Survived sütunu olmamalı;
-        # load_artifacts'ta df_clean'den encode çağrıldığında Survived vardı
-        # ama burada sadece girdi satırı var, yoksa encode hata vermez.
     }])
 
-    # src.preprocessing.encode ile aynı dönüşüm
     encoded = encode(row)
 
-    # Eğitimde oluşmayan dummy sütunları 0 ile doldur, sırayı uydur
     encoded = encoded.reindex(columns=feature_columns, fill_value=0)
 
-    # Ölçekleme (eğitimle aynı scaler) — DataFrame olarak sarmalayarak
-    # feature name uyarılarını önle
     scaled = pd.DataFrame(
         scaler.transform(encoded),
         columns=feature_columns,
@@ -187,7 +149,6 @@ if st.button("🔮 Tahmin Et", use_container_width=True, type="primary"):
     proba = model.predict_proba(scaled)[0, 1]
     hayatta_kalir = proba >= 0.5
 
-    # Sonuç gösterimi
     st.subheader("Tahmin Sonucu")
     st.caption(f"Model: **{model_adi}**")
 
